@@ -3,3 +3,5 @@
 ![alt text](<test_results/Buổi 2_Bài 2.2.png>)
 ![alt text](<test_results/Buổi 1_Bài 3.1.png>)
 ![alt text](<test_results/Buổi 1_Bài 3.2.png>)
+![alt text](<test_results/Buổi 1_Bài 4.1.png>)
+![alt text](<test_results/Buổi 1_Bài 4.2.png>)
