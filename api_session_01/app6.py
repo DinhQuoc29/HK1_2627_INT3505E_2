@@ -6,6 +6,7 @@ BOOKS = [
         "id": 1,
         "title": "The Great Gatsby",
         "author": "F. Scott Fitzgerald",
+        "year": 1925
     }
 ]
 
@@ -18,8 +19,29 @@ def find_book(book_id):
 #LiST - GET /books
 @app.route("/books", methods=["GET"])
 def get_books():
+    q = request.args.get("q", "").strip().lower()
+
+    books = BOOKS
+    if q:
+        books = [
+            book for book in BOOKS
+            if q in book["title"].lower()
+            or q in book["author"].lower()
+        ]
+
+    sort = request.args.get("sort")
+
+    if sort:
+        if sort not in ["title", "year"]:
+            return jsonify({"error": "sort must be title or year"}), 400
+
+        books = sorted(
+            books,
+            key=lambda book: book[sort]
+        )
+
     limit = int(request.args.get("limit", 100))
-    return jsonify(BOOKS[:limit]), 200
+    return jsonify(books[:limit]), 200
 
 #DETAIL - GET /books/<int:id>
 @app.route("/books/<int:book_id>", methods=["GET"])
@@ -34,15 +56,26 @@ def get_book(book_id):
 def create_book():
     global _next
     body = request.get_json(silent=True) or {}
-    title, author = body.get("title"), body.get("author")
+    title = body.get("title")
+    author = body.get("author")
+    year = body.get("year")
 
-    if not title or not author:
-        return jsonify({"error": "need title+author"}), 400
+    if not title or not author or year is None:
+        return jsonify({"error": "need title + author + year"}), 400
+
+    if not isinstance(year, (int, float)) or isinstance(year, bool):
+        return jsonify({"error": "year must be a number"}), 400
+
+    if year < 1900:
+        return jsonify({"error": "year must be >= 1900"}), 400
+    
     _next += 1
+    
     book = {
         "id": _next,
         "title": title,
-        "author": author
+        "author": author,
+        "year": year
     }
     BOOKS.append(book)
     return jsonify(book), 201
@@ -55,14 +88,23 @@ def update_book(book_id):
         return jsonify({"error": "not found"}), 404
 
     body = request.get_json(silent=True) or {}
-    title, author = body.get("title"), body.get("author")
+    title = body.get("title")
+    author = body.get("author")
+    year = body.get("year")
 
-    if not title or not author:
-        return jsonify({"error": "need title+author"}), 400
+    if not title or not author or year is None:
+        return jsonify({"error": "need title + author + year"}), 400
+
+    if not isinstance(year, (int, float)) or isinstance(year, bool):
+        return jsonify({"error": "year must be a number"}), 400
+
+    if year < 1900:
+        return jsonify({"error": "year must be >= 1900"}), 400
 
     book.update({
         "title": title,
-        "author": author
+        "author": author,
+        "year": year
     })
     return jsonify(book), 200
 
