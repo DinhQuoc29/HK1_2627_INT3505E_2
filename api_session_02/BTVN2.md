@@ -1,5 +1,4 @@
 # BÀI TẬP 2: AUDIT PUBLIC API THỰC TẾ
-**Môn học:** Phát triển ứng dụng Web / Dịch vụ Web & API  
 **Đối tượng khảo sát:** **GitHub REST API (v2022-11-28)**  
 **Base URL:** `https://api.github.com`  
 
