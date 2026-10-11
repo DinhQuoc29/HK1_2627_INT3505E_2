@@ -1,0 +1,250 @@
+
+openapi: 3.0.3
+
+info:
+  title: Tasks API
+  version: 1.0.0
+  description: Quan ly task noi bo
+
+servers:
+  - url: http://localhost:5000/v1
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: tasks
+    description: Quan ly cong viec
+
+paths:
+  /tasks:
+    get:
+      tags:
+        - tasks
+      summary: Lay danh sach cong viec
+      operationId: listTasks
+      parameters:
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/StatusFilter'
+      responses:
+        '200':
+          description: Lay danh sach thanh cong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - tasks
+      summary: Tao cong viec moi
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskInput'
+      responses:
+        '201':
+          description: Tao cong viec thanh cong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tasks/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        description: UUID cua cong viec
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags:
+        - tasks
+      summary: Lay chi tiet cong viec
+      operationId: getTaskById
+      responses:
+        '200':
+          description: Lay chi tiet thanh cong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - tasks
+      summary: Cap nhat cong viec
+      operationId: patchTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskInput'
+      responses:
+        '200':
+          description: Cap nhat thanh cong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags:
+        - tasks
+      summary: Xoa cong viec
+      operationId: deleteTask
+      responses:
+        '204':
+          description: Xoa thanh cong, khong co noi dung tra ve
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageLimit:
+      name: limit
+      in: query
+      required: false
+      description: So luong task toi da
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    StatusFilter:
+      name: status
+      in: query
+      required: false
+      description: Loc theo trang thai
+      schema:
+        $ref: '#/components/schemas/TaskStatus'
+
+  schemas:
+    Task:
+      type: object
+      required:
+        - taskId
+        - title
+        - status
+        - priority
+      properties:
+        taskId:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        title:
+          type: string
+          example: Hoan thanh bai tap OpenAPI
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-10-15'
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+
+    CreateTaskInput:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          example: Hoc OpenAPI
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+
+    UpdateTaskInput:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+
+    TaskStatus:
+      type: string
+      enum:
+        - TODO
+        - IN_PROGRESS
+        - DONE
+
+    TaskPriority:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+
+  responses:
+    Unauthorized:
+      description: Chua xac thuc hoac JWT khong hop le
+
+    NotFound:
+      description: Khong tim thay task
+
+    ValidationError:
+      description: Du lieu dau vao khong hop le
