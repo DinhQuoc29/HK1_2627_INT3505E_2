@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hotel",
+  "type": "object",
+  "required": ["id", "name", "address", "city", "country", "star_rating", "created_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 150
+    },
+    "address": {
+      "type": "string",
+      "minLength": 5
+    },
+    "city": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "Mã quốc gia ISO 3166-1 alpha-2"
+    },
+    "star_rating": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 5.0
+    },
+    "amenities": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

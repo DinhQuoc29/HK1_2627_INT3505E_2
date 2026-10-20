@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Payment",
+  "type": "object",
+  "required": ["id", "booking_id", "amount", "currency", "payment_method", "status", "created_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "booking_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "amount": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": ["credit_card", "bank_transfer", "e_wallet", "cash"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["initiated", "successful", "failed", "refunded"]
+    },
+    "transaction_ref": {
+      "type": ["string", "null"]
+    },
+    "paid_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}
