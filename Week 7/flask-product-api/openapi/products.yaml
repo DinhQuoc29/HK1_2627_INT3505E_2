@@ -1,0 +1,101 @@
+
+openapi: 3.0.3
+
+info:
+  title: Product API
+  version: 1.0.0
+  description: API quản lý sản phẩm
+
+servers:
+  - url: http://localhost:5000
+
+paths:
+  /products:
+    get:
+      operationId: api.products.list_products
+      summary: Lấy danh sách sản phẩm
+      responses:
+        '200':
+          description: Lấy danh sách thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+    post:
+      operationId: api.products.create_product
+      summary: Tạo sản phẩm mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductIn'
+      responses:
+        '201':
+          description: Tạo sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '422':
+          description: Dữ liệu không hợp lệ
+
+  /products/{id}:
+    get:
+      operationId: api.products.get_product
+      summary: Lấy thông tin sản phẩm theo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lấy sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Không tìm thấy sản phẩm
+
+components:
+  schemas:
+    ProductIn:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          example: iPhone 16
+        description:
+          type: string
+          example: Smartphone Apple
+        price:
+          type: number
+          format: float
+          minimum: 0
+          example: 20000000
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: iPhone 16
+        description:
+          type: string
+          example: Smartphone Apple
+        price:
+          type: number
+          format: float
+          example: 20000000
