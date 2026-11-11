@@ -1,0 +1,59 @@
+extends: ["spectral:oas"]
+
+rules:
+  # Tắt các cảnh báo phụ về documentation/tags/contact
+  info-contact: off
+  operation-tags: off
+  operation-description: off
+
+  # 1. Bắt buộc mọi operation phải có operationId
+  operation-operationId: error
+
+  # 2. Response 204 No Content không được phép có content / response body
+  no-204-body:
+    description: Responses with HTTP status 204 must not have a content body.
+    message: "HTTP 204 response must not define content: {{error}}"
+    severity: error
+    given: "$.paths..responses['204']"
+    then:
+      field: content
+      function: falsy
+
+  # 3. Book.year phải có type là integer (khớp với model Python Book.year)
+  book-year-type:
+    description: Book.year must be of type integer.
+    message: "Book.year must be integer, got {{value}}"
+    severity: error
+    given: "$.components.schemas.Book.properties.year"
+    then:
+      field: type
+      function: enumeration
+      functionOptions:
+        values:
+          - integer
+
+  # CUSTOM RULE: Response 200 phải có nhiều hơn 0 trường trong schema
+  # Mục đích: Đảm bảo phản hồi thành công 200 luôn định nghĩa rõ cấu trúc dữ liệu trả về (ít nhất 1 field với object hoặc có items với array),
+  # tránh trường hợp schema rỗng `{ type: object }` làm client/SDK không biết trước schema.
+  response-200-has-properties:
+    description: Response 200 schema must define fields (more than 0 properties for objects, or define items for arrays).
+    message: "Response 200 schema must define fields: {{error}}"
+    severity: error
+    resolved: true
+    given: "$.paths..responses['200'].content.*.schema"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          anyOf:
+            - type: object
+              properties:
+                properties:
+                  type: object
+                  minProperties: 1
+              required: [properties]
+            - type: object
+              properties:
+                items:
+                  type: object
+              required: [items]
