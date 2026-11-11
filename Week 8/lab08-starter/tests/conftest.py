@@ -28,3 +28,12 @@ def sample_book(app):
         db.session.add(book)
         db.session.commit()
         return book.id
+
+
+@pytest.fixture()
+def book_with_extra_field(client, sample_book):
+    """Giả lập response bị lộ thêm field lạ password_hash."""
+    response = client.get(f"/books/{sample_book}")
+    data = dict(response.get_json())
+    data["password_hash"] = "pbkdf2:sha256:260000$salt$fakehash123"
+    return data
