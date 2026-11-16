@@ -73,12 +73,15 @@ File `books-api.postman_collection.json` chứa 5 happy-path requests chạy the
 - Thêm **ít nhất 2 `pm.test` cho mỗi error request**: HTTP status và JSON `code`/`message`.
 - Chạy bằng Newman, lưu JUnit report.
 
-```bash
+From the `lab08-starter` directory, install Newman once and keep the API running in another terminal:
+
+```powershell
 npm install -g newman
-newman run books-api.postman_collection.json \
-  -e postman/local.postman_environment.json \
-  -r cli,junit --reporter-junit-export reports/junit.xml
+New-Item -ItemType Directory -Force reports | Out-Null
+newman run books-api.postman_collection.json -e postman/local.postman_environment.json -r 'cli,junit' --reporter-junit-export reports/junit.xml
 ```
+
+On Linux/macOS, create the output directory with `mkdir -p reports` and run the same Newman command. The JUnit report is written to `reports/junit.xml`. The collection runs five happy paths followed by two error paths; the create request stores `book_id` as a collection variable used by GET, PUT, and DELETE.
 
 Lưu ý: cần chạy server trước. `data.csv` là dữ liệu ví dụ để thực hành data-driven iteration; khi sử dụng `-d data.csv`, collection sẽ lặp theo số hàng. Đừng hard-code credentials/tokens trong file đẩy lên Git.
 
