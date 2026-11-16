@@ -99,6 +99,18 @@ locust -f performance/locustfile.py --headless -H http://127.0.0.1:5000 \
   -u 200 -r 50 -t 30s --html reports/C.html
 ```
 
+Windows PowerShell (using the project virtual environment):
+
+```powershell
+$python = ".\.venv\Scripts\python.exe"
+New-Item -ItemType Directory -Force reports | Out-Null
+& $python -m locust -f performance/locustfile.py --headless -H http://127.0.0.1:5000 -u 10 -r 2 -t 30s --html reports/A.html
+& $python -m locust -f performance/locustfile.py --headless -H http://127.0.0.1:5000 -u 50 -r 5 -t 60s --html reports/B.html
+& $python -m locust -f performance/locustfile.py --headless -H http://127.0.0.1:5000 -u 200 -r 50 -t 30s --html reports/C.html
+```
+
+B and C can return exit code 1 because the 1% Locust-side synthetic failure is counted as a failed request; the HTML report is still written.
+
 Hoàn thiện TODO `search_by_year` và nếu tạo 1% failure giả lập, **ghi rõ** đó là HTTP 500 do server phát hay client-side `response.failure()` của Locust. Điền `performance/analysis.md` bằng kết quả **đo thực tế**; báo cáo p95, failure rate, RPS, nhận xét giới hạn phép đo. Load test chạy Flask development server + SQLite chỉ có ý nghĩa thực hành, không thể khẳng định SLO production.
 
 ## 6. Cấu trúc thư mục
