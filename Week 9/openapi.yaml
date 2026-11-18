@@ -1,0 +1,147 @@
+openapi: 3.0.3
+info:
+  title: URI Versioned User API
+  version: 2.0.0
+  description: User API demonstrating URI path versioning with Flask Blueprints.
+servers:
+  - url: http://127.0.0.1:5000
+paths:
+  /api/v1/users/{id}:
+    get:
+      operationId: getUserV1
+      summary: Get a user using the legacy full_name schema
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User in v1 representation
+          headers:
+            Sunset:
+              description: Date when API v1 is scheduled to become unavailable.
+              schema:
+                type: string
+            Link:
+              description: Link to the successor v2 representation.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserV1'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v2/users/{id}:
+    get:
+      operationId: getUserV2
+      summary: Get a user using separate first_name and last_name fields
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User in v2 representation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserV2'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v2/users:
+    post:
+      operationId: createUserV2
+      summary: Create a user in API v2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: User created
+          headers:
+            Location:
+              description: URI of the created v2 user resource.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserV2'
+        '400':
+          description: Invalid or incomplete JSON body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    NotFound:
+      description: User does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFoundError'
+  schemas:
+    UserV1:
+      type: object
+      required: [id, full_name, email]
+      properties:
+        id:
+          type: integer
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+    UserV2:
+      type: object
+      required: [id, first_name, last_name, email]
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+    NewUser:
+      type: object
+      required: [first_name, last_name, email]
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+    NotFoundError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: nf
+    ValidationError:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: validation_error
+        message:
+          type: string
+        fields:
+          type: array
+          items:
+            type: string
